@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#11120f" />
+  <title>BFS MULTI GYM (AC) — Train With Intent</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* =========================================================
+       1. DESIGN TOKENS & GLOBAL STYLES
+       Change the values here to update the site's overall look.
+    ========================================================= */
+    :root {
+      --bg: #11120f;
+      --panel: #1a1c18;
+      --cream: #f1efe7;
+      --muted: #a5a69d;
+      --lime: #c7f36b;
+      --line: rgba(255, 255, 255, .12);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--cream);
+      font-family: 'DM Sans', sans-serif;
+    }
+    a { color: inherit; text-decoration: none; }
+    h1, h2, h3, p { margin-top: 0; }
+    .wrap { width: min(1160px, calc(100% - 48px)); margin: auto; }
+
+    /* =========================================================
+       2. HEADER & NAVIGATION
+    ========================================================= */
+    .nav {
+      height: 82px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--line);
+    }
+    .logo { font: 800 27px 'Barlow Condensed'; letter-spacing: 1.5px; }
+    .logo span { color: var(--lime); }
+    .navlinks { display: flex; gap: 32px; color: #c7c8c0; font-size: 13px; }
+    .navlinks a:hover { color: var(--lime); }
+    .navcta, .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: var(--lime);
+      color: #151710;
+      padding: 14px 20px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      border: 0;
+      cursor: pointer;
+      transition: .2s;
+    }
+    .navcta:hover, .btn:hover { transform: translateY(-2px); background: #d8ff8d; }
+
+    /* =========================================================
+       3. HERO SECTION
+    ========================================================= */
+    .hero {
+      min-height: 680px;
+      display: grid;
+      grid-template-columns: 1.02fr .98fr;
+      align-items: center;
+      gap: 48px;
+      padding: 74px 0 86px;
+    }
+    .eyebrow {
+      color: var(--lime);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .eyebrow:before { content: ''; width: 30px; height: 1px; background: var(--lime); }
+    h1 {
+      font: 900 clamp(64px, 8vw, 112px)/.88 'Barlow Condensed';
+      letter-spacing: -2px;
+      text-transform: uppercase;
+      margin: 24px 0;
+    }
+    .hero h1 em { font-style: normal; color: var(--lime); }
+    .lead { max-width: 470px; color: #b9bab1; font-size: 15px; line-height: 1.8; margin-bottom: 30px; }
+    .hero-actions { display: flex; align-items: center; gap: 22px; }
+    .textlink {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--lime);
+      padding-bottom: 6px;
+    }
+    .hero-visual { height: 530px; position: relative; background: #292c25; overflow: hidden; }
+    .hero-visual img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%) contrast(1.08); opacity: .82; }
+    .hero-visual:after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, rgba(17,18,15,.15), transparent 55%), linear-gradient(0deg, rgba(17,18,15,.45), transparent 55%);
+    }
+    .visual-tag { position: absolute; z-index: 1; bottom: 24px; left: 24px; font: 700 18px 'Barlow Condensed'; letter-spacing: 2px; text-transform: uppercase; }
+    .visual-tag span { color: var(--lime); }
+    .vertical { position: absolute; right: 18px; top: 22px; z-index: 1; writing-mode: vertical-rl; font-size: 10px; letter-spacing: 3px; color: #e7e8df; }
+
+    /* =========================================================
+       4. STATS STRIP
+    ========================================================= */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      padding: 25px 0;
+      margin-bottom: 110px;
+    }
+    .stat { padding: 0 28px; border-right: 1px solid var(--line); }
+    .stat:first-child { padding-left: 0; }
+    .stat:last-child { border: 0; }
+    .stat strong { display: block; font: 800 38px 'Barlow Condensed'; color: var(--lime); }
+    .stat span { font-size: 10px; letter-spacing: 1.5px; color: var(--muted); text-transform: uppercase; }
+
+    /* =========================================================
+       5. SECTION HEADINGS & SERVICES
+       Edit service names and descriptions in the HTML below.
+    ========================================================= */
+    .section { padding: 30px 0 110px; }
+    .section-head { display: flex; justify-content: space-between; align-items: end; gap: 30px; margin-bottom: 38px; }
+    .section h2 { font: 800 clamp(42px, 5vw, 66px)/.95 'Barlow Condensed'; text-transform: uppercase; margin: 16px 0 0; }
+    .section-head p { max-width: 350px; color: var(--muted); font-size: 13px; line-height: 1.8; margin: 0; }
+    .programs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .program { background: var(--panel); padding: 30px; min-height: 260px; border: 1px solid var(--line); position: relative; transition: .25s; }
+    .program:hover { border-color: var(--lime); transform: translateY(-5px); }
+    .program .num { color: var(--lime); font: 700 14px 'Barlow Condensed'; letter-spacing: 2px; }
+    .program h3 { font: 700 30px 'Barlow Condensed'; text-transform: uppercase; margin: 48px 0 12px; }
+    .program p { font-size: 13px; color: var(--muted); line-height: 1.7; max-width: 260px; }
+    .arrow { position: absolute; right: 26px; top: 26px; color: var(--lime); font-size: 22px; }
+
+    /* =========================================================
+       6. GYM PHOTO GALLERY
+       Replace the image URLs in the gallery HTML with your photos.
+    ========================================================= */
+    .interior-grid { display: grid; grid-template-columns: 1.35fr 1fr; grid-template-rows: 245px 245px; gap: 14px; }
+    .interior-shot { margin: 0; position: relative; overflow: hidden; background: #252820; min-height: 220px; }
+    .interior-shot.interior-main { grid-row: span 2; }
+    .interior-shot img { width: 100%; height: 100%; object-fit: cover; display: block; filter: grayscale(35%) contrast(1.06); transition: transform .65s ease, filter .4s ease; }
+    .interior-shot:hover img { transform: scale(1.045); filter: grayscale(0%) contrast(1.06); }
+    .interior-shot:after { content: ''; position: absolute; inset: 35% 0 0; background: linear-gradient(0deg, rgba(10,11,9,.88), transparent); pointer-events: none; }
+    .interior-shot figcaption { position: absolute; z-index: 1; left: 22px; right: 22px; bottom: 20px; display: flex; flex-direction: column; gap: 7px; }
+    .interior-shot figcaption span { font-size: 9px; letter-spacing: 2px; color: var(--lime); font-weight: 700; }
+    .interior-shot figcaption strong { font: 700 25px 'Barlow Condensed'; text-transform: uppercase; letter-spacing: .5px; }
+
+    /* =========================================================
+       7. MEMBER REVIEWS
+    ========================================================= */
+
+    /* =========================================================
+       8. MANIFESTO / ABOUT SECTION
+    ========================================================= */
+    .manifesto { padding: 86px 0; background: var(--lime); color: #171a12; }
+    .manifesto .eyebrow { color: #303b1e; }
+    .manifesto .eyebrow:before { background: #303b1e; }
+    .manifesto h2 { font: 900 clamp(48px, 7vw, 88px)/.9 'Barlow Condensed'; text-transform: uppercase; max-width: 850px; margin: 24px 0; }
+    .manifesto p { max-width: 510px; color: #465033; font-size: 14px; line-height: 1.8; }
+    .manifesto .btn { background: #171a12; color: var(--cream); margin-top: 12px; }
+
+    /* =========================================================
+       9. CONTACT DETAILS
+       Update the phone number and address in the contact HTML.
+    ========================================================= */
+    .contact { padding: 100px 0; }
+    .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 70px; align-items: start; }
+    .contact h2 { font: 900 clamp(54px, 7vw, 86px)/.88 'Barlow Condensed'; text-transform: uppercase; margin: 20px 0; }
+    .contact-copy { color: var(--muted); font-size: 14px; line-height: 1.8; max-width: 420px; }
+    .contact-card { background: var(--panel); border: 1px solid var(--line); padding: 34px; }
+    .contact-row { padding: 19px 0; border-bottom: 1px solid var(--line); }
+    .contact-row:last-of-type { border: 0; }
+    .contact-row small { display: block; color: var(--muted); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+    .contact-row strong { font-size: 15px; }
+    .contact-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 24px; }
+    .contact-actions a { padding: 16px 10px; text-align: center; font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; border: 1px solid var(--lime); }
+    .contact-actions a:first-child { background: var(--lime); color: #171a12; }
+    .contact-actions a:last-child:hover { background: var(--lime); color: #171a12; }
+
+    /* =========================================================
+       10. FOOTER & MOBILE CONTACT BAR
+    ========================================================= */
+    footer { border-top: 1px solid var(--line); padding: 26px 0; color: var(--muted); font-size: 11px; display: flex; justify-content: space-between; gap: 20px; }
+    .mobile-cta { display: none; }
+
+    /* =========================================================
+       11. RESPONSIVE / MOBILE STYLES
+    ========================================================= */
+    @media (max-width: 800px) {
+      .interior-grid { grid-template-columns: 1fr; grid-template-rows: 300px 220px 220px; }
+      .interior-shot.interior-main { grid-row: auto; }
+      .interior-shot figcaption strong { font-size: 23px; }
+      .wrap { width: min(100% - 36px, 600px); }
+      .nav { height: 70px; }
+      .navlinks { display: none; }
+      .navcta { padding: 12px 14px; font-size: 10px; }
+      .hero { grid-template-columns: 1fr; gap: 34px; padding: 65px 0 60px; }
+      .hero-visual { height: 390px; grid-row: 1; }
+      .hero-copy { grid-row: 2; }
+      .stats { margin-bottom: 70px; }
+      .stat { padding: 0 12px; }
+      .stat strong { font-size: 30px; }
+      .stat span { font-size: 8px; }
+      .section { padding-bottom: 75px; }
+      .section-head { display: block; }
+      .section-head p { margin-top: 20px; }
+      .programs { grid-template-columns: 1fr; }
+      .program { min-height: 210px; }
+      .program h3 { margin-top: 35px; }
+      .manifesto { padding: 65px 0; }
+      .contact { padding: 75px 0; }
+      .contact-grid { grid-template-columns: 1fr; gap: 35px; }
+      .contact-card { padding: 24px; }
+      footer { flex-direction: column; }
+      .mobile-cta { display: flex; position: fixed; bottom: 12px; left: 12px; right: 12px; z-index: 5; box-shadow: 0 8px 35px #0009; }
+      .mobile-cta a { flex: 1; text-align: center; padding: 15px 8px; background: var(--lime); color: #171a12; font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
+      .mobile-cta a + a { background: #20231c; color: var(--cream); border: 1px solid var(--lime); }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- =======================================================
+       HEADER
+  ======================================================== -->
+  <header class="wrap nav">
+    <a class="logo" href="#top">BFS <span>MULTI GYM</span>.</a>
+    <nav class="navlinks">
+      <a href="#programs">Services</a>
+      <a href="#about">Our philosophy</a>
+      <a href="#interiors">The space</a>
+      <a href="#reviews">Reviews</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <a class="navcta" href="#contact">Join the gym ↗</a>
+  </header>
+
+  <main id="top">
+    <!-- HERO: edit the headline, intro and main image here. -->
+    <section class="wrap hero">
+      <div class="hero-copy">
+        <div class="eyebrow">Your neighbourhood fitness destination</div>
+        <h1>Earn your<br><em>strong.</em></h1>
+        <p class="lead">Welcome to BFS Multi Gym (AC) — a friendly, well-equipped space to build strength, improve fitness and stay consistent. Whatever your goal, we’re here to help you get moving.</p>
+        <div class="hero-actions">
+          <a class="btn" href="#contact">Join the gym ↗</a>
+          <a class="textlink" href="#programs">Explore services</a>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <img src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1200&q=85" alt="Modern strength training gym">
+        <div class="vertical">DISCIPLINE OVER MOTIVATION</div>
+        <div class="visual-tag">No shortcuts. <span>Just work.</span></div>
+      </div>
+    </section>
+
+    <!-- QUICK STATS -->
+    <section class="wrap stats">
+      <div class="stat"><strong>01:01</strong><span>One day at a time</span></div>
+      <div class="stat"><strong>100%</strong><span>Commitment required</span></div>
+      <div class="stat"><strong>∞</strong><span>Room to grow</span></div>
+    </section>
+
+    <!-- SERVICES: add, remove or edit service cards in this section. -->
+    <section class="wrap section" id="programs">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">Find your focus</div>
+          <h2>Fitness for<br>every kind of goal.</h2>
+        </div>
+        <p>From strength training to group classes and active recreation, find the right way to move at BFS Multi Gym (AC).</p>
+      </div>
+      <div class="programs">
+        <article class="program">
+          <span class="num">01 / CARDIO</span><span class="arrow">↗</span>
+          <h3>Aerobics</h3>
+          <p>Build stamina and cardiovascular fitness through energetic movement.</p>
+        </article>
+        <article class="program">
+          <span class="num">02 / PERFORMANCE</span><span class="arrow">↗</span>
+          <h3>CrossFit</h3>
+          <p>Challenge your strength, endurance and functional fitness.</p>
+        </article>
+        <article class="program">
+          <span class="num">03 / GROUP CLASS</span><span class="arrow">↗</span>
+          <h3>Dance fitness</h3>
+          <p>Enjoy an upbeat group workout that keeps you moving.</p>
+        </article>
+        <article class="program">
+          <span class="num">04 / AQUATICS</span><span class="arrow">↗</span>
+          <h3>Aquatics</h3>
+          <p>Water-based fitness and activity options.</p>
+        </article>
+        <article class="program">
+          <span class="num">05 / FAMILY</span><span class="arrow">↗</span>
+          <h3>Child care</h3>
+          <p>A family-friendly service for members with little ones.</p>
+        </article>
+        <article class="program">
+          <span class="num">06 / RECREATION</span><span class="arrow">↗</span>
+          <h3>Adult sports</h3>
+          <p>Stay active, play and enjoy sport with others.</p>
+        </article>
+        <article class="program">
+          <span class="num">07 / ENDURANCE</span><span class="arrow">↗</span>
+          <h3>Cycling</h3>
+          <p>Ride for fitness, stamina and a stronger you.</p>
+        </article>
+      </div>
+      <p style="color: var(--muted); font-size: 11px; margin-top: 18px;">Ask the gym team for details about class schedules and service availability.</p>
+    </section>
+
+    <!-- GALLERY: replace these three image URLs with your actual gym photos. -->
+    <section class="wrap section interiors" id="interiors">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">Step inside BFS Multi Gym</div>
+          <h2>A space built<br>for the work.</h2>
+        </div>
+        <p>Purposeful equipment. Open training floors. An atmosphere that makes showing up feel different. Take a look around.</p>
+      </div>
+      <div class="interior-grid">
+        <figure class="interior-shot interior-main">
+          <img src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1400&q=85" alt="Spacious modern gym floor with strength equipment">
+          <figcaption><span>01 / THE FLOOR</span><strong>Room to get stronger.</strong></figcaption>
+        </figure>
+        <figure class="interior-shot">
+          <img src="https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=900&q=85" alt="Strength training equipment and free weights">
+          <figcaption><span>02 / STRENGTH ZONE</span><strong>Built for every rep.</strong></figcaption>
+        </figure>
+        <figure class="interior-shot">
+          <img src="https://images.unsplash.com/photo-1571902943202-507ec2618e8f?auto=format&fit=crop&w=900&q=85" alt="Modern gym cardio and training area">
+          <figcaption><span>03 / CONDITIONING</span><strong>Find your pace.</strong></figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- REVIEWS: edit reviewer names and feedback here. -->
+    <section class="wrap section" id="reviews">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">Member feedback</div>
+          <h2>Good people.<br>Real experiences.</h2>
+        </div>
+        <p>What members have shared about the equipment, trainers and welcoming atmosphere at BFS Multi Gym.</p>
+      </div>
+      <div class="programs">
+        <article class="program">
+          <div style="color: var(--lime); margin-bottom: 16px;">★★★★★</div>
+          <p>“Good equipments and the owner and the trainers are very friendly. The gym fees and admission charges are very pocket friendly. I suggest everyone this gym who need a better training and support.”</p>
+          <strong>Badmosh</strong>
+          <p>Member review · Owner replied with thanks</p>
+        </article>
+        <article class="program">
+          <div style="color: var(--lime); margin-bottom: 16px;">★★★★★</div>
+          <p>“This gym is great and perfect for bodybuilding. Moreover, the behavior of the trainer is quite appreciable. Everyone in the gym are engaging and provides a perfect environment which will push one beyond their limits.”</p>
+          <strong>Hitam Saha</strong>
+          <p>Member review</p>
+        </article>
+        <article class="program">
+          <div style="color: var(--lime); margin-bottom: 16px;">★★★★★</div>
+          <p>“Before signing a contract, it is highly recommended to grab a 1-day free pass to audit the facility yourself during the exact time you plan to work out.”</p>
+          <strong>Saharsha Nandy</strong>
+          <p>Local Guide · Practical visitor advice</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- ABOUT / BRAND MESSAGE -->
+    <section class="manifesto" id="about">
+      <div class="wrap">
+        <div class="eyebrow">The BFS mindset</div>
+        <h2>Motivation gets you started. Discipline keeps you here.</h2>
+        <p>Real progress is built rep by rep, session by session. We bring the space, the equipment and the energy. You bring the decision to begin.</p>
+        <a class="btn" href="#contact">Make your move ↗</a>
+      </div>
+    </section>
+
+    <!-- CONTACT: update the phone, WhatsApp link and address here. -->
+    <section class="wrap contact" id="contact">
+      <div class="contact-grid">
+        <div>
+          <div class="eyebrow">Your next chapter starts here</div>
+          <h2>Let’s get<br>to work.</h2>
+          <p class="contact-copy">Have a question about memberships, classes or your first session? Reach out directly. We’d love to help you get started.</p>
+        </div>
+        <div class="contact-card">
+          <div class="contact-row">
+            <small>Call us</small>
+            <strong id="phoneText">+91 9231843567</strong>
+          </div>
+          <div class="contact-row">
+            <small>WhatsApp</small>
+            <strong>Quick questions · Membership enquiries</strong>
+          </div>
+          <div class="contact-row">
+            <small>Visit us</small>
+            <strong>Chalk, Shibrampur Road, Govindapur, Gopalpur, Kolkata, Maheshtala, West Bengal 700143</strong>
+          </div>
+          <div class="contact-actions">
+            <a id="whatsappLink" href="https://wa.me/919231843567" target="_blank" rel="noopener">WhatsApp us ↗</a>
+            <a id="callLink" href="tel:+919231843567">Call now ↗</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="wrap">
+    <span>© <span id="year"></span> BFS MULTI GYM (AC). ALL RIGHTS RESERVED.</span>
+    <span>TRAIN WITH INTENT. LIVE WITH STRENGTH.</span>
+  </footer>
+
+  <!-- FIXED MOBILE CONTACT BUTTONS -->
+  <div class="mobile-cta">
+    <a href="https://wa.me/919231843567" target="_blank" rel="noopener">WhatsApp</a>
+    <a href="tel:+919231843567">Call now</a>
+  </div>
+
+  <script>
+    // Automatically keep the footer year current.
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
